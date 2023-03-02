@@ -6,6 +6,7 @@ import {
   FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
+  Repository,
 } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import {
@@ -15,6 +16,10 @@ import {
 } from '../types/transaction-events';
 
 export abstract class AbstractService<T extends BaseEntity> {
+  private onModuleInit() {
+    this.repository = this.dataSource.getRepository<T>(this.Entity);
+  }
+
   protected abstract Entity: {
     new (): T;
     prototype: Record<any, any>;
@@ -22,6 +27,8 @@ export abstract class AbstractService<T extends BaseEntity> {
 
   @InjectDataSource()
   protected readonly dataSource: DataSource;
+
+  protected repository: Repository<T>;
 
   protected async findOne(
     options: FindOneOptions<T>,

@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import { EnvironmentConfig } from '../environment.config';
+import { JwtModuleOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class ConfigurationService {
@@ -20,5 +21,15 @@ export class ConfigurationService {
 
   typeorm(): PostgresConnectionOptions {
     return this.getKey<PostgresConnectionOptions>('typeorm');
+  }
+
+  jwtOptions(): JwtModuleOptions {
+    return {
+      secret: this.env.JWT_SECRET,
+      secretOrPrivateKey: this.env.JWT_SECRET,
+      signOptions: {
+        expiresIn: this.env.JWT_EXPIRES_IN,
+      },
+    };
   }
 }
