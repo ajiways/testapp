@@ -3,7 +3,6 @@ module.exports = {
   parserOptions: {
     sourceType: 'module',
   },
-  exclude: ['test'],
   plugins: ['@typescript-eslint/eslint-plugin', 'unused-imports'],
   extends: [
     'plugin:@typescript-eslint/recommended',
