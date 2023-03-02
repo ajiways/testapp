@@ -16,6 +16,8 @@ import { JwtService } from '@nestjs/jwt';
 export const RequireRoles = (roles: EUserRole[]) =>
   SetMetadata('requiredRoles', roles);
 
+type ReqWithHeaders = { headers: { Authorization?: string } };
+
 @Injectable()
 export class RolesGuard implements CanActivate {
   @Inject(UserRoleService)
@@ -31,7 +33,7 @@ export class RolesGuard implements CanActivate {
   private readonly reflector: Reflector;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { headers } = context.switchToHttp().getRequest();
+    const { headers } = context.switchToHttp().getRequest<ReqWithHeaders>();
 
     const isPublic = this.reflector.get<boolean>(
       'isPublic',
