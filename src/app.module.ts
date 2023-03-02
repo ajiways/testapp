@@ -8,8 +8,9 @@ import TypeormConfig from './config/db/typeorm-config';
 import { PingModule } from './modules/ping/ping.module';
 import { AuthorizationModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { RoleModule } from './modules/role/role.module';
 
-const modules = [PingModule, UserModule, AuthorizationModule];
+const modules = [PingModule, UserModule, AuthorizationModule, RoleModule];
 
 @Module({
   imports: [
