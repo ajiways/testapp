@@ -37,6 +37,13 @@ export class EnvironmentConfig {
 
   @IsEnum(EEnv)
   STAGE: EEnv;
+
+  @IsString()
+  JWT_SECRET: string;
+
+  @Transform(({ value }: TTransformerValue) => Number(value))
+  @IsNumber()
+  JWT_EXPIRES_IN: number;
 }
 
 export default registerAs('testapp-env', function (): EnvironmentConfig {
