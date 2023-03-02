@@ -83,23 +83,23 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "lint-staged": {
-      "*.(ts)": [
-        "prettier --write",
-        "eslint --fix --exit-on-fatal-error --max-warnings=0",
-        "git add"
-      ],
-      "*.(json|js)": [
-        "prettier --write",
-        "git add"
-      ]
-    },
-    "husky": {
-      "hooks": {
-        "pre-commit": "npx lint-staged && npm run test",
-        "pre-push": "npm run type-coverage && npm run build"
-      }
+    "testEnvironment": "node"
+  },
+  "lint-staged": {
+    "*.(ts)": [
+      "prettier --write",
+      "eslint --fix --exit-on-fatal-error --max-warnings=0",
+      "git add"
+    ],
+    "*.(json|js)": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npx lint-staged && npm run test",
+      "pre-push": "npm run type-coverage && npm run build"
     }
   }
 }
