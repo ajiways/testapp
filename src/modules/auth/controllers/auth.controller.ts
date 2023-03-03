@@ -54,6 +54,7 @@ export class AuthorizationController {
   }
 
   @UseGuards(AuthorizationGuard)
+  @ApiResponse({ status: HttpStatus.OK, type: UserPreviewDto })
   @Get('/whoami')
   async whoAmI(@CurrentUser() user: UserPreviewDto) {
     return this.authService.whoAmI(user);

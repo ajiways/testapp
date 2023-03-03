@@ -1,5 +1,4 @@
 import { Inject } from '@nestjs/common/decorators';
-import { plainToInstance } from 'class-transformer';
 import { EntityManager } from 'typeorm';
 import { EUserRole } from '../../../common/enums/user-role.enum';
 import { AbstractService } from '../../../common/services/abstarct-service';
@@ -7,7 +6,6 @@ import { IGalleryService } from '../../image/interfaces/gallery-service.interfac
 import { GalleryService } from '../../image/services/gallery.service';
 import { IUserRoleService } from '../../role/interfaces/user-role.service.interface';
 import { UserRoleService } from '../../role/services/user-role.service';
-import { UserPreviewDto } from '../dto/user-preview.dto';
 import { UserEntity } from '../entities/user.entity';
 import { IUserService } from '../interfaces/user-serivce.interface';
 
@@ -27,7 +25,7 @@ export class UserService
     login: string,
     password: string,
     manager: EntityManager | undefined,
-  ): Promise<UserPreviewDto> {
+  ): Promise<UserEntity> {
     if (!manager) {
       return this.startTransaction((manager) =>
         this.createUser(login, password, manager),
@@ -54,13 +52,7 @@ export class UserService
 
     await this.galleryService.createAndAttachGallery(user, manager);
 
-    return plainToInstance(
-      UserPreviewDto,
-      { login: user.login, userId: user.id },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    return user;
   }
 
   public async findUser(
