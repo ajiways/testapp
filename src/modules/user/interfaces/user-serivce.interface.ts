@@ -14,4 +14,9 @@ export interface IUserService {
     login: string,
     manager?: EntityManager | undefined,
   ): Promise<UserEntity | null>;
+
+  findById(
+    id: number,
+    manager?: EntityManager | undefined,
+  ): Promise<UserEntity | null>;
 }

@@ -4,8 +4,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigurationService } from '../../../config/configuration/configuration.service';
 import { UserPreviewDto } from '../../user/dto/user-preview.dto';
 import { AuthorizationService } from '../services/auth.service';
-
-export type TTokenPayload = { login: string };
+import { TTokenPayload } from '../types/token-payload.type';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
