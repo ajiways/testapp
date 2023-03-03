@@ -11,20 +11,18 @@ import { UserService } from '../../user/services/user.service';
 import { IUserRoleService } from '../../role/interfaces/user-role.service.interface';
 import { UserRoleService } from '../../role/services/user-role.service';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 
 export const RequireRoles = (roles: EUserRole[]) =>
   SetMetadata('requiredRoles', roles);
 
-type ReqWithHeaders = { headers: { Authorization?: string } };
+type ReqWithHeaders = {
+  headers: { ['x-user-id']: string };
+};
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   @Inject(UserRoleService)
   private readonly userRoleService: IUserRoleService;
-
-  @Inject()
-  private readonly jwtService: JwtService;
 
   @Inject(UserService)
   private readonly userService: IUserService;
@@ -44,15 +42,13 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    if (!headers['Authorization'] || headers['Authorization'] === 'null') {
+    if (!headers['x-user-id'] || headers['x-user-id'] === 'null') {
       return false;
     }
 
-    const { login } = this.jwtService.decode(headers['Authorization']) as {
-      login: string;
-    };
+    const userId = Number(headers['x-user-id']);
 
-    const user = await this.userService.findUser(login);
+    const user = await this.userService.findById(userId);
 
     if (!user) {
       return false;

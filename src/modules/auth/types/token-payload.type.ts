@@ -1,1 +1,1 @@
-export type TTokenPayload = { login: string };
+export type TTokenPayload = { userId: number; login: string };

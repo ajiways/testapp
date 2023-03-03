@@ -8,9 +8,9 @@ import { UserService } from '../../user/services/user.service';
 import { RegisterDto } from '../dto/register/register.dto';
 import { AuthResponseDto } from '../dto/auth.response.dto';
 import { IAuthorizationService } from '../interfaces/auth.service.interface';
-import { TTokenPayload } from '../strategies/jwt-strategy';
 import { LoginDto } from '../dto/login/login.dto';
 import { ConfigurationService } from '../../../config/configuration/configuration.service';
+import { TTokenPayload } from '../types/token-payload.type';
 
 @Injectable()
 export class AuthorizationService implements IAuthorizationService {
@@ -33,14 +33,18 @@ export class AuthorizationService implements IAuthorizationService {
   public async validateUser(
     payload: TTokenPayload,
   ): Promise<UserPreviewDto | null> {
-    const user = await this.userService.findUser(payload.login);
+    const user = await this.userService.findById(payload.userId);
 
     let userPreview: UserPreviewDto | null = null;
 
     if (user) {
-      userPreview = plainToInstance(UserPreviewDto, user, {
-        excludeExtraneousValues: true,
-      });
+      userPreview = plainToInstance(
+        UserPreviewDto,
+        { login: user.login, userId: user.id },
+        {
+          excludeExtraneousValues: true,
+        },
+      );
     }
 
     return userPreview;
@@ -60,9 +64,13 @@ export class AuthorizationService implements IAuthorizationService {
       hashedPassword,
     );
 
-    const token = await this.createJWTToken({ login: newUser.login });
+    const token = await this.createJWTToken({
+      login: newUser.login,
+      userId: newUser.userId,
+    });
 
     return plainToInstance(AuthResponseDto, {
+      id: newUser.userId,
       login: newUser.login,
       message: 'Успешная регистрация!',
       token,
@@ -82,9 +90,13 @@ export class AuthorizationService implements IAuthorizationService {
       throw new BadRequestException('Ошибка авторизации');
     }
 
-    const token = await this.createJWTToken({ login: dto.login });
+    const token = await this.createJWTToken({
+      login: dto.login,
+      userId: candidate.id,
+    });
 
     return plainToInstance(AuthResponseDto, {
+      id: candidate.id,
       login: candidate.login,
       message: 'Успешная авторизация!',
       token,

@@ -6,6 +6,7 @@ import {
   FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
+  In,
   Repository,
 } from 'typeorm';
 import { BaseEntity } from '../base.entity';
@@ -122,6 +123,39 @@ export abstract class AbstractService<T extends BaseEntity> {
 
       await manager.delete(this.Entity, candidate);
       return candidate;
+    }
+  }
+
+  protected async deleteEntities(
+    toDelete: T[],
+    manager?: EntityManager | undefined,
+  ): Promise<void>;
+  protected async deleteEntities(
+    criteria: FindOptionsWhere<T>,
+    manager?: EntityManager | undefined,
+  ): Promise<void>;
+  protected async deleteEntities(
+    toDeleteOrCriteria: T[] | FindOptionsWhere<T>,
+    manager?: EntityManager | undefined,
+  ): Promise<void> {
+    if (!manager) {
+      return this.startTransaction((manager) => {
+        if (toDeleteOrCriteria instanceof Array) {
+          return this.deleteEntities(toDeleteOrCriteria, manager);
+        } else {
+          return this.deleteEntities(toDeleteOrCriteria, manager);
+        }
+      });
+    }
+
+    if (toDeleteOrCriteria instanceof Array) {
+      await manager.delete(this.Entity, {
+        id: In(toDeleteOrCriteria.map((i) => i.id)),
+      });
+    } else {
+      await manager.delete(this.Entity, {
+        id: toDeleteOrCriteria,
+      });
     }
   }
 

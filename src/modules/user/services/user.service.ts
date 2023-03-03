@@ -3,6 +3,8 @@ import { plainToInstance } from 'class-transformer';
 import { EntityManager } from 'typeorm';
 import { EUserRole } from '../../../common/enums/user-role.enum';
 import { AbstractService } from '../../../common/services/abstarct-service';
+import { IGalleryService } from '../../image/interfaces/gallery-service.interface';
+import { GalleryService } from '../../image/services/gallery.service';
 import { IUserRoleService } from '../../role/interfaces/user-role.service.interface';
 import { UserRoleService } from '../../role/services/user-role.service';
 import { UserPreviewDto } from '../dto/user-preview.dto';
@@ -17,6 +19,9 @@ export class UserService
 
   @Inject(UserRoleService)
   private readonly userRoleService: IUserRoleService;
+
+  @Inject(GalleryService)
+  private readonly galleryService: IGalleryService;
 
   public async createUser(
     login: string,
@@ -47,9 +52,15 @@ export class UserService
       );
     }
 
-    return plainToInstance(UserPreviewDto, user, {
-      excludeExtraneousValues: true,
-    });
+    await this.galleryService.createAndAttachGallery(user, manager);
+
+    return plainToInstance(
+      UserPreviewDto,
+      { login: user.login, userId: user.id },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   public async findUser(
@@ -60,12 +71,17 @@ export class UserService
       return this.startTransaction((manager) => this.findUser(login, manager));
     }
 
-    const candidate = await this.findOne({ where: { login } });
+    return await this.findOne({ where: { login } });
+  }
 
-    if (candidate) {
-      return candidate;
+  public async findById(
+    id: number,
+    manager: EntityManager | undefined,
+  ): Promise<UserEntity | null> {
+    if (!manager) {
+      return this.startTransaction((manager) => this.findById(id, manager));
     }
 
-    return null;
+    return this.findOne({ where: { id } });
   }
 }
