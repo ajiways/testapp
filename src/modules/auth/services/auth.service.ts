@@ -11,6 +11,8 @@ import { IAuthorizationService } from '../interfaces/auth.service.interface';
 import { LoginDto } from '../dto/login/login.dto';
 import { ConfigurationService } from '../../../config/configuration/configuration.service';
 import { TTokenPayload } from '../types/token-payload.type';
+import { UserRoleService } from '../../role/services/user-role.service';
+import { IUserRoleService } from '../../role/interfaces/user-role.service.interface';
 
 @Injectable()
 export class AuthorizationService implements IAuthorizationService {
@@ -22,6 +24,9 @@ export class AuthorizationService implements IAuthorizationService {
 
   @Inject()
   private readonly jwtService: JwtService;
+
+  @Inject(UserRoleService)
+  private readonly roleService: IUserRoleService;
 
   private async createJWTToken(payload: TTokenPayload): Promise<string> {
     return await this.jwtService.signAsync(payload, {
@@ -38,9 +43,15 @@ export class AuthorizationService implements IAuthorizationService {
     let userPreview: UserPreviewDto | null = null;
 
     if (user) {
+      const userRoles = await this.roleService.getUserRoles(user);
+
       userPreview = plainToInstance(
         UserPreviewDto,
-        { login: user.login, userId: user.id },
+        {
+          login: user.login,
+          userId: user.id,
+          roles: userRoles.map((role) => role.role),
+        },
         {
           excludeExtraneousValues: true,
         },
@@ -66,14 +77,17 @@ export class AuthorizationService implements IAuthorizationService {
 
     const token = await this.createJWTToken({
       login: newUser.login,
-      userId: newUser.userId,
+      userId: newUser.id,
     });
 
+    const userRoles = await this.roleService.getUserRoles(newUser);
+
     return plainToInstance(AuthResponseDto, {
-      id: newUser.userId,
+      id: newUser.id,
       login: newUser.login,
       message: 'Успешная регистрация!',
       token,
+      roles: userRoles.map((role) => role.role),
     });
   }
 
@@ -95,11 +109,14 @@ export class AuthorizationService implements IAuthorizationService {
       userId: candidate.id,
     });
 
+    const userRoles = await this.roleService.getUserRoles(candidate);
+
     return plainToInstance(AuthResponseDto, {
       id: candidate.id,
       login: candidate.login,
       message: 'Успешная авторизация!',
       token,
+      roles: userRoles.map((role) => role.role),
     });
   }
 
